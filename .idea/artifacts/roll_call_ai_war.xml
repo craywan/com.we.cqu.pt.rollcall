@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="roll-call-ai:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="roll-call-ai.war">
+      <element id="artifact" artifact-name="roll-call-ai:war exploded" />
+    </root>
+  </artifact>
+</component>

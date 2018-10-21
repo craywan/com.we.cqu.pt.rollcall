@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="edu.uddp.mapper.JssjMapper" >
+  <resultMap id="BaseResultMap" type="edu.uddp.model.Jssj" >
+    <result column="jsbh" property="jsbh" jdbcType="VARCHAR" />
+    <result column="xm" property="xm" jdbcType="VARCHAR" />
+    <result column="jys" property="jys" jdbcType="VARCHAR" />
+    <result column="xy" property="xy" jdbcType="VARCHAR" />
+    <result column="jsgh" property="jsgh" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    jsbh, xm, jys, xy, jsgh
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="edu.uddp.model.JssjExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from jssj
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="edu.uddp.model.JssjExample" >
+    delete from jssj
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="edu.uddp.model.Jssj" >
+    insert into jssj (jsbh, xm, jys, 
+      xy, jsgh)
+    values (#{jsbh,jdbcType=VARCHAR}, #{xm,jdbcType=VARCHAR}, #{jys,jdbcType=VARCHAR}, 
+      #{xy,jdbcType=VARCHAR}, #{jsgh,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="edu.uddp.model.Jssj" >
+    insert into jssj
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="jsbh != null" >
+        jsbh,
+      </if>
+      <if test="xm != null" >
+        xm,
+      </if>
+      <if test="jys != null" >
+        jys,
+      </if>
+      <if test="xy != null" >
+        xy,
+      </if>
+      <if test="jsgh != null" >
+        jsgh,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="jsbh != null" >
+        #{jsbh,jdbcType=VARCHAR},
+      </if>
+      <if test="xm != null" >
+        #{xm,jdbcType=VARCHAR},
+      </if>
+      <if test="jys != null" >
+        #{jys,jdbcType=VARCHAR},
+      </if>
+      <if test="xy != null" >
+        #{xy,jdbcType=VARCHAR},
+      </if>
+      <if test="jsgh != null" >
+        #{jsgh,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="edu.uddp.model.JssjExample" resultType="java.lang.Integer" >
+    select count(*) from jssj
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update jssj
+    <set >
+      <if test="record.jsbh != null" >
+        jsbh = #{record.jsbh,jdbcType=VARCHAR},
+      </if>
+      <if test="record.xm != null" >
+        xm = #{record.xm,jdbcType=VARCHAR},
+      </if>
+      <if test="record.jys != null" >
+        jys = #{record.jys,jdbcType=VARCHAR},
+      </if>
+      <if test="record.xy != null" >
+        xy = #{record.xy,jdbcType=VARCHAR},
+      </if>
+      <if test="record.jsgh != null" >
+        jsgh = #{record.jsgh,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update jssj
+    set jsbh = #{record.jsbh,jdbcType=VARCHAR},
+      xm = #{record.xm,jdbcType=VARCHAR},
+      jys = #{record.jys,jdbcType=VARCHAR},
+      xy = #{record.xy,jdbcType=VARCHAR},
+      jsgh = #{record.jsgh,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+</mapper>

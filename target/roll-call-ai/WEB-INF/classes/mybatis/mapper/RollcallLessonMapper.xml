@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.uddp.mapper.RollcallLessonMapper">
+  <resultMap id="BaseResultMap" type="edu.uddp.model.RollcallLesson">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="lesson_id" jdbcType="VARCHAR" property="lessonId" />
+    <result column="key" jdbcType="CHAR" property="key" />
+    <result column="status" jdbcType="CHAR" property="status" />
+    <!--<association property="stuLesson" javaType="edu.uddp.model.StuLesson">-->
+      <!--<result column="name" jdbcType="VARCHAR" property="name" />-->
+      <!--<result column="teacher_name" jdbcType="VARCHAR" property="teacherName"/>-->
+    <!--</association>-->
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    lesson_id, `key`, status
+  </sql>
+  <select id="selectByExample" parameterType="edu.uddp.model.RollcallLessonExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from rollcall_lesson
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from rollcall_lesson
+    where `key` = #{key,jdbcType=CHAR}
+  </select>
+  <select id="selectByStatus" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    lesson_id, name, teacher_name
+    from rollcall_lesson
+    where id = #{status,jdbcType=CHAR}
+  </select>
+  <select id="selectByLessonId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from rollcall_lesson
+    where lesson_id = #{lessonId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from rollcall_lesson
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from rollcall_lesson
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="edu.uddp.model.RollcallLessonExample">
+    delete from rollcall_lesson
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="edu.uddp.model.RollcallLesson">
+    insert into rollcall_lesson (lesson_id, `key`, status) VALUES (#{lessonId,jdbcType=CHAR}, #{key,jdbcType=CHAR}, #{status,jdbcType=CHAR})
+    on duplicate key update
+    `key` = VALUES (`key`),
+    status = VALUES (status)
+  </insert>
+  <insert id="insertSelective" parameterType="edu.uddp.model.RollcallLesson">
+    insert into rollcall_lesson
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="lessonId != null">
+        lesson_id,
+      </if>
+      <if test="key != null">
+        key,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="lessonId != null">
+        #{lessonId,jdbcType=VARCHAR},
+      </if>
+      <if test="key != null">
+        #{key,jdbcType=CHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="edu.uddp.model.RollcallLessonExample" resultType="java.lang.Long">
+    select count(*) from rollcall_lesson
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update rollcall_lesson
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.lessonId != null">
+        lesson_id = #{record.lessonId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.key != null">
+        key = #{record.key,jdbcType=CHAR},
+      </if>
+      <if test="record.status != null">
+        status = #{record.status,jdbcType=CHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update rollcall_lesson
+    set id = #{record.id,jdbcType=INTEGER},
+      lesson_id = #{record.lessonId,jdbcType=VARCHAR},
+      key = #{record.key,jdbcType=CHAR},
+      status = #{record.status,jdbcType=CHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="edu.uddp.model.RollcallLesson">
+    update rollcall_lesson
+    <set>
+      <if test="lessonId != null">
+        lesson_id = #{lessonId,jdbcType=VARCHAR},
+      </if>
+      <if test="key != null">
+        key = #{key,jdbcType=CHAR},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="edu.uddp.model.RollcallLesson">
+    update rollcall_lesson
+    set lesson_id = #{lessonId,jdbcType=VARCHAR},
+      key = #{key,jdbcType=CHAR},
+      status = #{status,jdbcType=CHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByLessonIdSelective" parameterType="edu.uddp.model.RollcallLesson">
+    update rollcall_lesson
+    <set>
+      <if test="lessonId != null">
+        lesson_id = #{lessonId,jdbcType=VARCHAR},
+      </if>
+      <if test="key != null">
+        key = #{key,jdbcType=CHAR},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=CHAR},
+      </if>
+    </set>
+    where lesson_id = #{lessonId,jdbcType=VARCHAR}
+  </update>
+</mapper>

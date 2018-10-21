@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="edu.uddp.mapper.TeaSignStatisticMapper" >
+  <resultMap id="BaseResultMap" type="edu.uddp.model.TeaSignStatistic" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="sign_id" property="signId" jdbcType="VARCHAR" />
+    <result column="lesson_id" property="lessonId" jdbcType="VARCHAR" />
+    <result column="tea_id" property="teaId" jdbcType="VARCHAR" />
+    <result column="unsign_id" property="unsignId" jdbcType="VARCHAR" />
+    <result column="unsign_num" property="unsignNum" jdbcType="INTEGER" />
+    <result column="weeks" property="weeks" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, sign_id, lesson_id, tea_id, unsign_id, unsign_num, weeks
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="edu.uddp.model.TeaSignStatisticExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from tea_sign_statistic
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tea_sign_statistic
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByLimit" resultMap="BaseResultMap" parameterType="java.util.List" >
+    select
+    <include refid="Base_Column_List" />
+    from tea_sign_statistic
+    <where> lesson_id IN
+    <foreach collection="list" index="index" item="item" open="("
+                  separator="," close=")">
+      #{item}
+    </foreach>
+    </where>
+    ORDER BY id DESC
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tea_sign_statistic
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="edu.uddp.model.TeaSignStatisticExample" >
+    delete from tea_sign_statistic
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="edu.uddp.model.TeaSignStatistic" >
+    insert into tea_sign_statistic (id, sign_id, lesson_id, 
+      tea_id, unsign_id, unsign_num, 
+      weeks)
+    values (#{id,jdbcType=INTEGER}, #{signId,jdbcType=VARCHAR}, #{lessonId,jdbcType=VARCHAR}, 
+      #{teaId,jdbcType=VARCHAR}, #{unsignId,jdbcType=VARCHAR}, #{unsignNum,jdbcType=INTEGER}, 
+      #{weeks,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="edu.uddp.model.TeaSignStatistic" >
+    insert into tea_sign_statistic
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="signId != null" >
+        sign_id,
+      </if>
+      <if test="lessonId != null" >
+        lesson_id,
+      </if>
+      <if test="teaId != null" >
+        tea_id,
+      </if>
+      <if test="unsignId != null" >
+        unsign_id,
+      </if>
+      <if test="unsignNum != null" >
+        unsign_num,
+      </if>
+      <if test="weeks != null" >
+        weeks,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="signId != null" >
+        #{signId,jdbcType=VARCHAR},
+      </if>
+      <if test="lessonId != null" >
+        #{lessonId,jdbcType=VARCHAR},
+      </if>
+      <if test="teaId != null" >
+        #{teaId,jdbcType=VARCHAR},
+      </if>
+      <if test="unsignId != null" >
+        #{unsignId,jdbcType=VARCHAR},
+      </if>
+      <if test="unsignNum != null" >
+        #{unsignNum,jdbcType=INTEGER},
+      </if>
+      <if test="weeks != null" >
+        #{weeks,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="edu.uddp.model.TeaSignStatisticExample" resultType="java.lang.Integer" >
+    select count(*) from tea_sign_statistic
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update tea_sign_statistic
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.signId != null" >
+        sign_id = #{record.signId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.lessonId != null" >
+        lesson_id = #{record.lessonId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.teaId != null" >
+        tea_id = #{record.teaId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.unsignId != null" >
+        unsign_id = #{record.unsignId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.unsignNum != null" >
+        unsign_num = #{record.unsignNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.weeks != null" >
+        weeks = #{record.weeks,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update tea_sign_statistic
+    set id = #{record.id,jdbcType=INTEGER},
+      sign_id = #{record.signId,jdbcType=VARCHAR},
+      lesson_id = #{record.lessonId,jdbcType=VARCHAR},
+      tea_id = #{record.teaId,jdbcType=VARCHAR},
+      unsign_id = #{record.unsignId,jdbcType=VARCHAR},
+      unsign_num = #{record.unsignNum,jdbcType=INTEGER},
+      weeks = #{record.weeks,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="edu.uddp.model.TeaSignStatistic" >
+    update tea_sign_statistic
+    <set >
+      <if test="signId != null" >
+        sign_id = #{signId,jdbcType=VARCHAR},
+      </if>
+      <if test="lessonId != null" >
+        lesson_id = #{lessonId,jdbcType=VARCHAR},
+      </if>
+      <if test="teaId != null" >
+        tea_id = #{teaId,jdbcType=VARCHAR},
+      </if>
+      <if test="unsignId != null" >
+        unsign_id = #{unsignId,jdbcType=VARCHAR},
+      </if>
+      <if test="unsignNum != null" >
+        unsign_num = #{unsignNum,jdbcType=INTEGER},
+      </if>
+      <if test="weeks != null" >
+        weeks = #{weeks,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="edu.uddp.model.TeaSignStatistic" >
+    update tea_sign_statistic
+    set sign_id = #{signId,jdbcType=VARCHAR},
+      lesson_id = #{lessonId,jdbcType=VARCHAR},
+      tea_id = #{teaId,jdbcType=VARCHAR},
+      unsign_id = #{unsignId,jdbcType=VARCHAR},
+      unsign_num = #{unsignNum,jdbcType=INTEGER},
+      weeks = #{weeks,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

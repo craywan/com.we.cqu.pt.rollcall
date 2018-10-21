@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="edu.uddp.mapper.LessonsMapper" >
+  <resultMap id="BaseResultMap" type="edu.uddp.model.Lessons" >
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="xq" property="xq" jdbcType="CHAR" />
+    <result column="bj" property="bj" jdbcType="VARCHAR" />
+    <result column="kcbh" property="kcbh" jdbcType="VARCHAR" />
+    <result column="kcmc" property="kcmc" jdbcType="VARCHAR" />
+    <result column="js" property="js" jdbcType="VARCHAR" />
+    <result column="jsbh" property="jsbh" jdbcType="CHAR" />
+    <result column="jiaos" property="jiaos" jdbcType="VARCHAR" />
+    <result column="sd" property="sd" jdbcType="VARCHAR" />
+    <result column="jxb" property="jxb" jdbcType="VARCHAR" />
+    <result column="kclb" property="kclb" jdbcType="CHAR" />
+    <result column="zym" property="zym" jdbcType="VARCHAR" />
+    <result column="yxm" property="yxm" jdbcType="VARCHAR" />
+    <result column="nj" property="nj" jdbcType="CHAR" />
+    <result column="xs" property="xs" jdbcType="INTEGER" />
+    <result column="llxs" property="llxs" jdbcType="INTEGER" />
+    <result column="xyxs" property="xyxs" jdbcType="INTEGER" />
+    <result column="ez" property="ez" jdbcType="BIT" />
+    <result column="sjlp" property="sjlp" jdbcType="BIT" />
+    <result column="zc" property="zc" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, xq, bj, kcbh, kcmc, js, jsbh, jiaos, sd, jxb, kclb, zym, yxm, nj, xs, llxs, xyxs, 
+    ez, sjlp, zc
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="edu.uddp.model.LessonsExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from lessons
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+  select
+  <include refid="Base_Column_List" />
+  FROM lessons
+</select>
+  <select id="selectLikes" resultMap="BaseResultMap" parameterType="edu.uddp.model.Lessons">
+    select
+    <include refid="Base_Column_List" />
+    FROM lessons <where>
+    bj LIKE "%"#{bj}"%" OR kcmc LIKE "%"#{kcmc}"%" OR js LIKE "%"#{js}"%" OR jiaos LIKE "%"#{jiaos}"%"
+  </where> Limit 50
+  </select>
+
+  <delete id="deleteByExample" parameterType="edu.uddp.model.LessonsExample" >
+    delete from lessons
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="edu.uddp.model.Lessons" >
+    insert into lessons (id, xq, bj, kcbh, 
+      kcmc, js, jsbh, jiaos, 
+      sd, jxb, kclb, zym, 
+      yxm, nj, xs, llxs, 
+      xyxs, ez, sjlp, zc
+      )
+    values (#{id,jdbcType=INTEGER}, #{xq,jdbcType=CHAR}, #{bj,jdbcType=VARCHAR}, #{kcbh,jdbcType=VARCHAR}, 
+      #{kcmc,jdbcType=VARCHAR}, #{js,jdbcType=VARCHAR}, #{jsbh,jdbcType=CHAR}, #{jiaos,jdbcType=VARCHAR}, 
+      #{sd,jdbcType=VARCHAR}, #{jxb,jdbcType=VARCHAR}, #{kclb,jdbcType=CHAR}, #{zym,jdbcType=VARCHAR}, 
+      #{yxm,jdbcType=VARCHAR}, #{nj,jdbcType=CHAR}, #{xs,jdbcType=INTEGER}, #{llxs,jdbcType=INTEGER}, 
+      #{xyxs,jdbcType=INTEGER}, #{ez,jdbcType=BIT}, #{sjlp,jdbcType=BIT}, #{zc,jdbcType=CHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="edu.uddp.model.Lessons" >
+    insert into lessons
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="xq != null" >
+        xq,
+      </if>
+      <if test="bj != null" >
+        bj,
+      </if>
+      <if test="kcbh != null" >
+        kcbh,
+      </if>
+      <if test="kcmc != null" >
+        kcmc,
+      </if>
+      <if test="js != null" >
+        js,
+      </if>
+      <if test="jsbh != null" >
+        jsbh,
+      </if>
+      <if test="jiaos != null" >
+        jiaos,
+      </if>
+      <if test="sd != null" >
+        sd,
+      </if>
+      <if test="jxb != null" >
+        jxb,
+      </if>
+      <if test="kclb != null" >
+        kclb,
+      </if>
+      <if test="zym != null" >
+        zym,
+      </if>
+      <if test="yxm != null" >
+        yxm,
+      </if>
+      <if test="nj != null" >
+        nj,
+      </if>
+      <if test="xs != null" >
+        xs,
+      </if>
+      <if test="llxs != null" >
+        llxs,
+      </if>
+      <if test="xyxs != null" >
+        xyxs,
+      </if>
+      <if test="ez != null" >
+        ez,
+      </if>
+      <if test="sjlp != null" >
+        sjlp,
+      </if>
+      <if test="zc != null" >
+        zc,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="xq != null" >
+        #{xq,jdbcType=CHAR},
+      </if>
+      <if test="bj != null" >
+        #{bj,jdbcType=VARCHAR},
+      </if>
+      <if test="kcbh != null" >
+        #{kcbh,jdbcType=VARCHAR},
+      </if>
+      <if test="kcmc != null" >
+        #{kcmc,jdbcType=VARCHAR},
+      </if>
+      <if test="js != null" >
+        #{js,jdbcType=VARCHAR},
+      </if>
+      <if test="jsbh != null" >
+        #{jsbh,jdbcType=CHAR},
+      </if>
+      <if test="jiaos != null" >
+        #{jiaos,jdbcType=VARCHAR},
+      </if>
+      <if test="sd != null" >
+        #{sd,jdbcType=VARCHAR},
+      </if>
+      <if test="jxb != null" >
+        #{jxb,jdbcType=VARCHAR},
+      </if>
+      <if test="kclb != null" >
+        #{kclb,jdbcType=CHAR},
+      </if>
+      <if test="zym != null" >
+        #{zym,jdbcType=VARCHAR},
+      </if>
+      <if test="yxm != null" >
+        #{yxm,jdbcType=VARCHAR},
+      </if>
+      <if test="nj != null" >
+        #{nj,jdbcType=CHAR},
+      </if>
+      <if test="xs != null" >
+        #{xs,jdbcType=INTEGER},
+      </if>
+      <if test="llxs != null" >
+        #{llxs,jdbcType=INTEGER},
+      </if>
+      <if test="xyxs != null" >
+        #{xyxs,jdbcType=INTEGER},
+      </if>
+      <if test="ez != null" >
+        #{ez,jdbcType=BIT},
+      </if>
+      <if test="sjlp != null" >
+        #{sjlp,jdbcType=BIT},
+      </if>
+      <if test="zc != null" >
+        #{zc,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="edu.uddp.model.LessonsExample" resultType="java.lang.Integer" >
+    select count(*) from lessons
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update lessons
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.xq != null" >
+        xq = #{record.xq,jdbcType=CHAR},
+      </if>
+      <if test="record.bj != null" >
+        bj = #{record.bj,jdbcType=VARCHAR},
+      </if>
+      <if test="record.kcbh != null" >
+        kcbh = #{record.kcbh,jdbcType=VARCHAR},
+      </if>
+      <if test="record.kcmc != null" >
+        kcmc = #{record.kcmc,jdbcType=VARCHAR},
+      </if>
+      <if test="record.js != null" >
+        js = #{record.js,jdbcType=VARCHAR},
+      </if>
+      <if test="record.jsbh != null" >
+        jsbh = #{record.jsbh,jdbcType=CHAR},
+      </if>
+      <if test="record.jiaos != null" >
+        jiaos = #{record.jiaos,jdbcType=VARCHAR},
+      </if>
+      <if test="record.sd != null" >
+        sd = #{record.sd,jdbcType=VARCHAR},
+      </if>
+      <if test="record.jxb != null" >
+        jxb = #{record.jxb,jdbcType=VARCHAR},
+      </if>
+      <if test="record.kclb != null" >
+        kclb = #{record.kclb,jdbcType=CHAR},
+      </if>
+      <if test="record.zym != null" >
+        zym = #{record.zym,jdbcType=VARCHAR},
+      </if>
+      <if test="record.yxm != null" >
+        yxm = #{record.yxm,jdbcType=VARCHAR},
+      </if>
+      <if test="record.nj != null" >
+        nj = #{record.nj,jdbcType=CHAR},
+      </if>
+      <if test="record.xs != null" >
+        xs = #{record.xs,jdbcType=INTEGER},
+      </if>
+      <if test="record.llxs != null" >
+        llxs = #{record.llxs,jdbcType=INTEGER},
+      </if>
+      <if test="record.xyxs != null" >
+        xyxs = #{record.xyxs,jdbcType=INTEGER},
+      </if>
+      <if test="record.ez != null" >
+        ez = #{record.ez,jdbcType=BIT},
+      </if>
+      <if test="record.sjlp != null" >
+        sjlp = #{record.sjlp,jdbcType=BIT},
+      </if>
+      <if test="record.zc != null" >
+        zc = #{record.zc,jdbcType=CHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update lessons
+    set id = #{record.id,jdbcType=INTEGER},
+      xq = #{record.xq,jdbcType=CHAR},
+      bj = #{record.bj,jdbcType=VARCHAR},
+      kcbh = #{record.kcbh,jdbcType=VARCHAR},
+      kcmc = #{record.kcmc,jdbcType=VARCHAR},
+      js = #{record.js,jdbcType=VARCHAR},
+      jsbh = #{record.jsbh,jdbcType=CHAR},
+      jiaos = #{record.jiaos,jdbcType=VARCHAR},
+      sd = #{record.sd,jdbcType=VARCHAR},
+      jxb = #{record.jxb,jdbcType=VARCHAR},
+      kclb = #{record.kclb,jdbcType=CHAR},
+      zym = #{record.zym,jdbcType=VARCHAR},
+      yxm = #{record.yxm,jdbcType=VARCHAR},
+      nj = #{record.nj,jdbcType=CHAR},
+      xs = #{record.xs,jdbcType=INTEGER},
+      llxs = #{record.llxs,jdbcType=INTEGER},
+      xyxs = #{record.xyxs,jdbcType=INTEGER},
+      ez = #{record.ez,jdbcType=BIT},
+      sjlp = #{record.sjlp,jdbcType=BIT},
+      zc = #{record.zc,jdbcType=CHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+</mapper>
