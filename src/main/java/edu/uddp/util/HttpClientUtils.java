@@ -58,10 +58,13 @@ public class HttpClientUtils {
         client = HttpClients.custom().setConnectionManager(cm).build();
     }
 
+
     public static String postParameters(String url, String parameterStr) throws ConnectTimeoutException, SocketTimeoutException, Exception{
         return post(url,parameterStr,"application/x-www-form-urlencoded",charset,connTimeout,readTimeout);
     }
-
+    public static byte[] QRPostParameters(String url, String parameterStr) throws ConnectTimeoutException, SocketTimeoutException, Exception{
+        return QRPost(url,parameterStr,"application/json",charset,connTimeout,readTimeout);
+    }
     public static String postParameters(String url, String parameterStr,String charset, Integer connTimeout, Integer readTimeout) throws ConnectTimeoutException, SocketTimeoutException, Exception{
         return post(url,parameterStr,"application/x-www-form-urlencoded",charset,connTimeout,readTimeout);
     }
@@ -138,6 +141,46 @@ public class HttpClientUtils {
         return result;
     }
 
+    public static byte[] QRPost(String url, String body, String mimeType,String charset, Integer connTimeout, Integer readTimeout)
+            throws ConnectTimeoutException, SocketTimeoutException, Exception {
+        HttpClient client = null;
+        HttpPost post = new HttpPost(url);
+        byte[] result = null;
+        try {
+            if (StringUtils.isNotBlank(body)) {
+                HttpEntity entity = new StringEntity(body, ContentType.create(mimeType, charset));
+                post.setEntity(entity);
+            }
+            // 设置参数
+            Builder customReqConf = RequestConfig.custom();
+            if (connTimeout != null) {
+                customReqConf.setConnectTimeout(connTimeout);
+            }
+            if (readTimeout != null) {
+                customReqConf.setSocketTimeout(readTimeout);
+            }
+            post.setConfig(customReqConf.build());
+
+            HttpResponse res;
+            if (url.startsWith("https")) {
+                // 执行 Https 请求.
+                client = createSSLInsecureClient();
+                res = client.execute(post);
+            } else {
+                // 执行 Http 请求.
+                client = HttpClientUtils.client;
+                res = client.execute(post);
+            }
+            result=IOUtils.toByteArray(res.getEntity().getContent());
+        } finally {
+            post.releaseConnection();
+            if (url.startsWith("https") && client != null&& client instanceof CloseableHttpClient) {
+                ((CloseableHttpClient) client).close();
+            }
+        }
+        return result;
+    }
+
 
     /**
      * 提交form表单
@@ -169,6 +212,8 @@ public class HttpClientUtils {
 
             if (headers != null && !headers.isEmpty()) {
                 for (Entry<String, String> entry : headers.entrySet()) {
+                    System.out.println(entry.getKey().toString());
+                    System.out.println(entry.getValue().toString());
                     post.addHeader(entry.getKey(), entry.getValue());
                 }
             }

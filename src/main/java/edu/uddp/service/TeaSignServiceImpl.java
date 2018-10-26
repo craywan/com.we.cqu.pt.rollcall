@@ -73,6 +73,7 @@ public class TeaSignServiceImpl implements TeaSignService {
         codeUuidMapper.updateByPrimaryKey(codeUuid);
         String signId = codeUuid.getId().toString();
         String signPassword = codeUuid.getCode();
+        System.out.println("signId"+signId);
         //生成签到
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm");
