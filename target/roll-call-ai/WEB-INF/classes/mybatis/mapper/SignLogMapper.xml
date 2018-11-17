@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="edu.uddp.mapper.SignLogMapper" >
+  <resultMap id="BaseResultMap" type="edu.uddp.model.SignLog" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="sign_password" property="signPassword" jdbcType="VARCHAR" />
+    <result column="lesson_id" property="lessonId" jdbcType="VARCHAR" />
+    <result column="class_id" property="classId" jdbcType="VARCHAR" />
+    <result column="weeks" property="weeks" jdbcType="VARCHAR" />
+    <result column="sign_time" property="signTime" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, user_id, sign_password, lesson_id, class_id, weeks, sign_time
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="edu.uddp.model.SignLogExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from sign_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from sign_log
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from sign_log
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="edu.uddp.model.SignLogExample" >
+    delete from sign_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="edu.uddp.model.SignLog" >
+    insert into sign_log (id, user_id, sign_password, 
+      lesson_id, class_id, weeks, 
+      sign_time)
+    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=VARCHAR}, #{signPassword,jdbcType=VARCHAR}, 
+      #{lessonId,jdbcType=VARCHAR}, #{classId,jdbcType=VARCHAR}, #{weeks,jdbcType=VARCHAR}, 
+      #{signTime,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="edu.uddp.model.SignLog" >
+    insert into sign_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="signPassword != null" >
+        sign_password,
+      </if>
+      <if test="lessonId != null" >
+        lesson_id,
+      </if>
+      <if test="classId != null" >
+        class_id,
+      </if>
+      <if test="weeks != null" >
+        weeks,
+      </if>
+      <if test="signTime != null" >
+        sign_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="signPassword != null" >
+        #{signPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="lessonId != null" >
+        #{lessonId,jdbcType=VARCHAR},
+      </if>
+      <if test="classId != null" >
+        #{classId,jdbcType=VARCHAR},
+      </if>
+      <if test="weeks != null" >
+        #{weeks,jdbcType=VARCHAR},
+      </if>
+      <if test="signTime != null" >
+        #{signTime,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="edu.uddp.model.SignLogExample" resultType="java.lang.Integer" >
+    select count(*) from sign_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update sign_log
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.signPassword != null" >
+        sign_password = #{record.signPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="record.lessonId != null" >
+        lesson_id = #{record.lessonId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.classId != null" >
+        class_id = #{record.classId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.weeks != null" >
+        weeks = #{record.weeks,jdbcType=VARCHAR},
+      </if>
+      <if test="record.signTime != null" >
+        sign_time = #{record.signTime,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update sign_log
+    set id = #{record.id,jdbcType=INTEGER},
+      user_id = #{record.userId,jdbcType=VARCHAR},
+      sign_password = #{record.signPassword,jdbcType=VARCHAR},
+      lesson_id = #{record.lessonId,jdbcType=VARCHAR},
+      class_id = #{record.classId,jdbcType=VARCHAR},
+      weeks = #{record.weeks,jdbcType=VARCHAR},
+      sign_time = #{record.signTime,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="edu.uddp.model.SignLog" >
+    update sign_log
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="signPassword != null" >
+        sign_password = #{signPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="lessonId != null" >
+        lesson_id = #{lessonId,jdbcType=VARCHAR},
+      </if>
+      <if test="classId != null" >
+        class_id = #{classId,jdbcType=VARCHAR},
+      </if>
+      <if test="weeks != null" >
+        weeks = #{weeks,jdbcType=VARCHAR},
+      </if>
+      <if test="signTime != null" >
+        sign_time = #{signTime,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="edu.uddp.model.SignLog" >
+    update sign_log
+    set user_id = #{userId,jdbcType=VARCHAR},
+      sign_password = #{signPassword,jdbcType=VARCHAR},
+      lesson_id = #{lessonId,jdbcType=VARCHAR},
+      class_id = #{classId,jdbcType=VARCHAR},
+      weeks = #{weeks,jdbcType=VARCHAR},
+      sign_time = #{signTime,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
