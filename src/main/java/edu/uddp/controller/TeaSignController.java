@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 
 import java.util.*;
 
+import edu.uddp.service.TeaCommonService;
 import edu.uddp.service.TeaSignService;
 import edu.uddp.vo.ResponseData;
 import io.swagger.annotations.Api;
@@ -28,6 +29,8 @@ import javax.servlet.http.HttpSession;
 public class TeaSignController {
     @Resource
     private TeaSignService teaSignService;
+    @Resource
+    private TeaCommonService teaCommonService;
 
     @ApiOperation(value = "根据教师id获取id")
     @RequestMapping(value = "/selectCourses/{teaId}", produces = "text/plain;charset=utf-8")
@@ -47,7 +50,11 @@ public class TeaSignController {
         String lessonId = (String) paramsMap.get("lessonId");
         String weeks = (String) paramsMap.get("weeks");
         String classIds = (String) paramsMap.get("classId");
-        return teaSignService.CreatSign(paramsMap, session);
+        if(teaCommonService.judgeSign(paramsMap)=="0") {
+            return teaSignService.CreatSign(paramsMap, session);
+        }else{
+            return teaCommonService.getAlreadySign(teaCommonService.judgeSign(paramsMap),paramsMap);
+        }
     }
     /*
     1.发布签到接口
@@ -101,7 +108,7 @@ public class TeaSignController {
     @ApiOperation(value = "结束点名", notes = "结束点名")
     @ApiImplicitParams({@ApiImplicitParam(name = "teaId", value = "教师ID"), @ApiImplicitParam(name = "lessonId", value = "教学班号")
             , @ApiImplicitParam(name = "weeksDay", value = "星期几"), @ApiImplicitParam(name = "weeks", value = "周数"), @ApiImplicitParam(name = "signId", value = "签到"),
-            @ApiImplicitParam(name = "signPassword", value = "签到口令")})
+            @ApiImplicitParam(name = "signPassword", value = "签到口令"), @ApiImplicitParam(name = "classId", value = "班级Id")})
 
     @RequestMapping("/endSign")
     @ResponseBody
@@ -117,6 +124,7 @@ public class TeaSignController {
         String teaId = (String) paramsMap.get("teaId");
         String signId = (String) paramsMap.get("signId");
         String lessonId = (String) paramsMap.get("lessonId");
+        String classId = (String) paramsMap.get("classId");
         String signPassword = (String) paramsMap.get("signPassword");
         String weeks = (String) paramsMap.get("weeks");
         String weeksDay = (String) paramsMap.get("weeksDay");

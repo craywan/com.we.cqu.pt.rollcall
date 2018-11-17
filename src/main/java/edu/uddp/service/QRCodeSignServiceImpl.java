@@ -3,10 +3,7 @@ package edu.uddp.service;
 import edu.uddp.mapper.UserInfoMapper;
 import edu.uddp.model.UserInfo;
 import edu.uddp.model.UserInfoExample;
-import edu.uddp.util.CommonUtil;
-import edu.uddp.util.ConfigUtil;
-import edu.uddp.util.RedisUtil;
-import edu.uddp.util.ResponseUtil;
+import edu.uddp.util.*;
 import edu.uddp.vo.ResponseData;
 import org.springframework.stereotype.Service;
 
@@ -34,19 +31,35 @@ public class QRCodeSignServiceImpl implements QRCodeSignService{
             String stuId = userInfos.get(0).getXh();
             RedisUtil redisUtil = new RedisUtil();
             int flag = 0;
-            if (!(redisUtil.getHashKey(signPassword, stuId) == null)) {
-                //获取缓存中map集合中的value
-                int stuStatus = (int) redisUtil.getHashKey(signPassword, stuId);
-                //获取nums
-                int signNums = (int) redisUtil.getHashKey(signPassword, "signNums");
-                if (stuStatus == 1) {
-                    flag = 2;//重复签到
-                } else {
-                    //更新
-                    redisUtil.updataHash(signPassword, stuId, 1);
-                    redisUtil.updataHash(signPassword, "signNums", signNums + 1);
-                    flag = 1;//成功签到
+            if(!(EhcacheUtil.getInstance().get("mobileCache",signPassword)==null)) {
+                //获取缓存中的签到信息集合
+                Map<Object,Object> signInfoMap = (Map<Object, Object>) EhcacheUtil.getInstance().get("mobileCache",signPassword);
+                //获取学生的签到状态
+                int stuStatus = (int) signInfoMap.get(stuId);
+                //获取签到人数
+                int signNums= (int) signInfoMap.get("signNums");
+                //状态判断
+                if(stuStatus==1){
+                    flag=2;//重复签到
+                }else{
+                    //更新签到状态
+                    signInfoMap.put(stuId,1);
+                    signInfoMap.put("signNums",signNums+1);
+                    flag=1;//签到成功
                 }
+//            if (!(redisUtil.getHashKey(signPassword, stuId) == null)) {
+//                //获取缓存中map集合中的value
+//                int stuStatus = (int) redisUtil.getHashKey(signPassword, stuId);
+//                //获取nums
+//                int signNums = (int) redisUtil.getHashKey(signPassword, "signNums");
+//                if (stuStatus == 1) {
+//                    flag = 2;//重复签到
+//                } else {
+//                    //更新
+//                    redisUtil.updataHash(signPassword, stuId, 1);
+//                    redisUtil.updataHash(signPassword, "signNums", signNums + 1);
+//                    flag = 1;//成功签到
+//                }
                 session.setAttribute("signNums", signNums + 1);
                 if (flag == 1) {
                     return ResponseUtil.setResponse(200, "OK",userInfos.get(0));

@@ -1,6 +1,8 @@
 package edu.uddp.model;
 
-public class StuInfo {
+import java.io.Serializable;
+
+public  class  StuInfo implements Serializable{
     private Integer id;
 
     private String stuId;

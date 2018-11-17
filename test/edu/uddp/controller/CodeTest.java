@@ -3,6 +3,7 @@ package edu.uddp.controller;
 import edu.uddp.mapper.CodeUuidMapper;
 import edu.uddp.model.CodeUuid;
 import edu.uddp.service.TeaSignService;
+import edu.uddp.util.EhcacheUtil;
 import edu.uddp.util.JwzxUtil;
 import edu.uddp.util.UuidCodeUtil;
 import org.junit.Test;
@@ -18,6 +19,11 @@ public class CodeTest extends BaseTest{
     @Test
     public void getCode(){
         teaSignService.setUuidCodes();
+    }
+    @Test
+    public void testCache(){
+        EhcacheUtil.getInstance().put("mobileCache","wan","zhong");
+        System.out.println(EhcacheUtil.getInstance().get("mobileCache","wan"));
     }
 
 }

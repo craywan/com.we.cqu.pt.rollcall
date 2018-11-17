@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:aop="http://www.springframework.org/schema/aop"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       xmlns:cache="http://www.springframework.org/schema/cache"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/context
-       http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+       http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
   <!-- 扫描service包下所有使用注解的类型 -->
   <context:component-scan base-package="edu.uddp.service"/>
@@ -15,9 +18,9 @@
   <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
     <!-- 基本属性 url、user、password -->
     <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-    <property name="url" value="jdbc:mysql://202.202.43.139:3306/wecqupt_wzw?characterEncoding=utf-8"/>
+    <property name="url" value="jdbc:mysql://172.20.2.210:3306/wecqupt_wzw?characterEncoding=utf-8"/>
     <property name="username" value="liu"/>
-    <property name="password" value="qq470401911"/>
+    <property name="password" value="DM@0cqupt.lanshan"/>
 
     <!-- 配置初始化大小、最小、最大 -->
     <property name="initialSize" value="1"/>
@@ -68,56 +71,132 @@
 
   <!--redis-->
   <!-- 读取properties文件 -->
-  <context:property-placeholder location="classpath:properties/redis.properties" ignore-unresolvable="true"/>
-  <!-- jedis 连接池配置 -->
-  <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
-    <property name="maxIdle" value="300"/>
-    <property name="maxWaitMillis" value="1000"/>
-    <property name="testOnBorrow" value="true"/>
-    <property name="testOnReturn" value="true" />
-  </bean>
-  <!-- redis连接工厂 -->
-  <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
-    <property name="poolConfig" ref="poolConfig"/>
-    <property name="port" value="6379"/>
-    <property name="hostName" value="127.0.0.1"/>
-    <property name="timeout" value="100000"/>
-  </bean>
-  <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
-    <property name="connectionFactory" ref="connectionFactory"/>
-    <property name="keySerializer">
-      <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
-    </property>
-    <property name="valueSerializer">
-      <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"/>
-    </property>
+  <!--<context:property-placeholder location="classpath:properties/redis.properties" ignore-unresolvable="true"/>-->
+  <!--&lt;!&ndash; jedis 连接池配置 &ndash;&gt;-->
+  <!--<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">-->
+    <!--<property name="maxIdle" value="500"/>-->
+    <!--<property name="minIdle" value="0"/>-->
+    <!--<property name="maxWaitMillis" value="10000"/>-->
+    <!--<property name="testOnBorrow" value="true"/>-->
+    <!--<property name="testOnReturn" value="true" />-->
+  <!--</bean>-->
+  <!--&lt;!&ndash; redis连接工厂 &ndash;&gt;-->
+  <!--<bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">-->
+    <!--<property name="poolConfig" ref="poolConfig"/>-->
+    <!--<property name="port" value="7379"/>-->
+    <!--<property name="hostName" value="127.0.0.1"/>-->
+    <!--<property name="timeout" value="100000"/>-->
+  <!--</bean>-->
+  <!--<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">-->
+    <!--<property name="connectionFactory" ref="connectionFactory"/>-->
+    <!--<property name="keySerializer">-->
+      <!--<bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>-->
+    <!--</property>-->
+    <!--<property name="valueSerializer">-->
+      <!--<bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"/>-->
+    <!--</property>-->
     <!--<property name="enableTransactionSupport" value="true"></property>-->
-  </bean>
+  <!--</bean>-->
   <!-- 缓存拦截器配置 -->
-  <bean id="methodCacheInterceptor" class="edu.uddp.interceptor.MethodCacheInterceptor">
-    <property name="redisUtil" ref="redisUtil"/>
-    <property name="defaultCacheExpireTime" value="3600"/>
-    <!-- 禁用缓存的类名列表 -->
-    <property name="targetNamesList">
-      <list>
-        <value></value>
-      </list>
-    </property>
-    <!-- 禁用缓存的方法名列表 -->
-    <property name="methodNamesList">
-      <list>
-        <value></value>
-      </list>
-    </property>
-  </bean>
-  <bean id="redisUtil" class="edu.uddp.util.RedisUtil">
-    <property name="redisTemplate" ref="redisTemplate"/>
-  </bean>
-  <!--配置切面拦截方法 -->
-  <aop:config proxy-target-class="true">
-    <!--将包下的所有select开头的方法加入拦截去掉select则加入所有方法-->
-    <aop:pointcut id="controllerMethodPointcut" expression="execution(* edu.uddp.service.*.select*(..))"/>
-    <aop:advisor advice-ref="methodCacheInterceptor" pointcut-ref="controllerMethodPointcut"/>
-  </aop:config>
+  <!--<bean id="methodCacheInterceptor" class="edu.uddp.interceptor.MethodCacheInterceptor">-->
+    <!--<property name="redisUtil" ref="redisUtil"/>-->
+    <!--<property name="defaultCacheExpireTime" value="3600"/>-->
+    <!--&lt;!&ndash; 禁用缓存的类名列表 &ndash;&gt;-->
+    <!--<property name="targetNamesList">-->
+      <!--<list>-->
+        <!--<value></value>-->
+      <!--</list>-->
+    <!--</property>-->
+    <!--&lt;!&ndash; 禁用缓存的方法名列表 &ndash;&gt;-->
+    <!--<property name="methodNamesList">-->
+      <!--<list>-->
+        <!--<value></value>-->
+      <!--</list>-->
+    <!--</property>-->
+  <!--</bean>-->
+  <!--<bean id="redisUtil" class="edu.uddp.util.RedisUtil">-->
+    <!--<property name="redisTemplate" ref="redisTemplate"/>-->
+  <!--</bean>-->
+  <!--&lt;!&ndash;配置切面拦截方法 &ndash;&gt;-->
+  <!--<aop:config proxy-target-class="true">-->
+    <!--&lt;!&ndash;将包下的所有select开头的方法加入拦截去掉select则加入所有方法&ndash;&gt;-->
+    <!--<aop:pointcut id="controllerMethodPointcut" expression="execution(* edu.uddp.service.*.select*(..))"/>-->
+    <!--<aop:advisor advice-ref="methodCacheInterceptor" pointcut-ref="controllerMethodPointcut"/>-->
+  <!--</aop:config>-->
+
+
+  <!-- 引用ehCache 的配置-->
+  <!--<cache:annotation-driven cache-manager = "springCacheManager"/>-->
+
+  <!-- 要先开启缓存 -->
+  <!--<context:component-scan base-package = "edu.uddp.service"></context:component-scan>-->
+
+
+  <!--<bean id="cacheManager"-->
+        <!--class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">-->
+    <!--<property name="configLocation">-->
+      <!--<value>classpath:spring/encache.xml</value>-->
+    <!--</property>-->
+  <!--</bean>-->
+
+  <!--&lt;!&ndash; 定义ehCache 的工厂，并设置所使用的Cache name &ndash;&gt;-->
+  <!--<bean id="simpleCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">-->
+    <!--<property name="cacheManager" ref="cacheManager" />-->
+    <!--&lt;!&ndash; 使用缓存 关联ehcache.xml中的缓存配置 &ndash;&gt;-->
+    <!--<property name="cacheName" >-->
+      <!--<value>mobileCache</value>-->
+    <!--</property>-->
+  <!--</bean>-->
+
+  <!--&lt;!&ndash; find/create cache 拦截器&ndash;&gt;-->
+  <!--<bean id="MethodEhCacheInterceptor" class="edu.uddp.interceptor.MethodEhCacheInterceptor">-->
+    <!--<property name="cache" ref="simpleCache"/>-->
+  <!--</bean>-->
+
+  <!--&lt;!&ndash; flush cache 拦截器&ndash;&gt;-->
+  <!--<bean id="methodCacheAfterAdvice" class="com.microcampus.ehcache.interceptor.MethodCacheAfterAdvice">-->
+  <!--<property name="cache" ref="simpleCache"/>-->
+  <!--</bean>-->
+
+  <!-- 参与缓存的切入点对象 (切入点对象，确定何时何地调用拦截器) -->
+  <!--<bean id="methodCachePointCut"-->
+        <!--class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">-->
+    <!--&lt;!&ndash; 配置缓存aop切面 &ndash;&gt;-->
+    <!--<property name="advice" ref="MethodEhCacheInterceptor" />-->
+    <!--&lt;!&ndash; 配置哪些方法参与缓存策略 .表示符合任何单一字元 ### +表示符合前一个字元一次或多次 ### *表示符合前一个字元零次或多次 ###-->
+        <!--\Escape任何Regular expression使用到的符号 .*表示前面的前缀(包括包名) 表示print方法 &ndash;&gt;-->
+    <!--&lt;!&ndash; 下面的配置就使得在数据访问时，cache将拦截从数据库获取的数据，与cache数据比较，如有就不放入cache，没有就放入，更新到数据库去，也是先存入cache，再更新到数据库中去 &ndash;&gt;-->
+    <!--<property name="patterns">-->
+      <!--<list>-->
+        <!--&lt;!&ndash; <value>com.microcampus.ehcache.rest.*RestService*\.*get.*</value>-->
+            <!--<value>com.microcampus.ehcache.rest.*RestService*\.*search.*</value> &ndash;&gt;-->
+        <!--<value>.*select.*</value>-->
+        <!--<value>.*get.*</value>-->
+      <!--</list>-->
+    <!--</property>-->
+  <!--</bean>-->
+
+  <!--<bean id="springCacheManager"/>-->
+
+  <!--&lt;!&ndash;<bean id="methodCachePointCutAdvice"&ndash;&gt;-->
+  <!--&lt;!&ndash;class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">&ndash;&gt;-->
+  <!--&lt;!&ndash;<property name="advice" ref="methodCacheAfterAdvice" />&ndash;&gt;-->
+  <!--&lt;!&ndash;<property name="patterns">&ndash;&gt;-->
+  <!--&lt;!&ndash;<list>&ndash;&gt;-->
+  <!--&lt;!&ndash;<value>.*create.*</value>&ndash;&gt;-->
+  <!--&lt;!&ndash;<value>.*update.*</value>&ndash;&gt;-->
+  <!--&lt;!&ndash;<value>.*delete.*</value>&ndash;&gt;-->
+  <!--&lt;!&ndash;</list>&ndash;&gt;-->
+  <!--&lt;!&ndash;</property>&ndash;&gt;-->
+  <!--&lt;!&ndash;</bean>&ndash;&gt;-->
+
+  <!--&lt;!&ndash; <bean id="personManager" class="org.springframework.aop.framework.ProxyFactoryBean">-->
+      <!--<property name="target" value="personManagerTarget" />-->
+      <!--<property name="interceptorNames">-->
+          <!--<list>-->
+              <!--<value>methodCachePointCut</value>-->
+          <!--</list>-->
+      <!--</property>-->
+  <!--</bean>&ndash;&gt;-->
 
 </beans>

@@ -45,14 +45,15 @@ public class QRCodeSignController {
     @ResponseBody
     public void getQRCode(@PathVariable String signPassword, HttpServletResponse httpServletResponse){
         //String signPassword = (String) paramsMap.get("signPassword");
-        String redirectUrl = "https://we.cqu.pt/dm/rollcall-w/QRCodeSign/codeSign?signPassword="+signPassword;
+        String redirectUrl = "https://we.cqu.pt/dm/rollcall-w/QRCodeSign/codeSign";
         String enRedirectUrl=null;
         try {
              enRedirectUrl = URLEncoder.encode(redirectUrl,"utf-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        String Url= ConfigUtil.ERWEI_URL.replace("APPID",ConfigUtil.APPID).replace("REDIRECT_URI",enRedirectUrl);
+//        String Url= ConfigUtil.ERWEI_URL.replace("APPID",ConfigUtil.APPID).replace("REDIRECT_URI",enRedirectUrl);
+        String Url="http://www.vicwen.com/";
         //获取二维
         byte[] QRArray = QRUtil.getQR(Url);
         httpServletResponse.setContentType("image/png");
@@ -79,15 +80,15 @@ public class QRCodeSignController {
     /**
      * 扫码签到
      * @param session
-     * @param code
+     * @param
      * @param signPassword
      * @return
      */
     @ApiOperation(value="扫码签到实现")
     @RequestMapping("/codeSign")
     @ResponseBody
-    @ApiImplicitParams({@ApiImplicitParam(name="openId",value="用户的openId"),@ApiImplicitParam(name="signPassword",value="签到口令")})
-    public ResponseData codeSign(HttpSession session, @RequestParam String openId,@RequestParam String signPassword){
+    @ApiImplicitParams({@ApiImplicitParam(name="stuId",value="用户的openId"),@ApiImplicitParam(name="signPassword",value="签到口令")})
+    public ResponseData codeSign(HttpSession session, @RequestParam String stuId,@RequestParam String signPassword){
     /*
     1.检测是否为空
     2.根据code去获取openid
@@ -95,7 +96,7 @@ public class QRCodeSignController {
     4.根据signPassword去得到缓存中的数据
     5.进行签到逻辑判断
      */
-    return qrCodeSignService.codeSign(session,openId,signPassword);
+    return qrCodeSignService.codeSign(session,stuId,signPassword);
 
     }
 }

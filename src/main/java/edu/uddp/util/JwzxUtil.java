@@ -27,7 +27,7 @@ public class JwzxUtil {
 
 
     /**
-     * @Description: 根据班级/课程编号获取学生名单
+     * @Description: 根据班级/课程编号获取学生名单(获取班级成员的接口已经失效)
      * @Param: [key, type]
      * @return: java.util.List
      * @Date: 2018/8/8
@@ -80,7 +80,7 @@ public class JwzxUtil {
     }
 
     /**
-     * 获取课程号和班级号
+     * 获取课程号和周次
      *
      * @return
      */
@@ -108,7 +108,7 @@ public class JwzxUtil {
      */
     public static Set<String> getWeek(String html){
         Set<String> resultSet = new HashSet<>();
-        String regex = "今天是第 [1-9]{1,2} 周";
+        String regex = "今天是第 [0-9]{1,2} 周";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(html);
         while(matcher.find()){

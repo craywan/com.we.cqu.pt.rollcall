@@ -13,11 +13,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.omg.IOP.TAG_CODE_SETS;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
@@ -25,18 +24,24 @@ import java.io.PrintWriter;
 import java.util.*;
 
 
-@Api(tags="获取信息的公共接口")
+/**
+ * @program: rollcall-ai
+ * @description:
+ * @author: wanzh
+ * @create: 2018-09-22
+ **/
+@Api(tags = "获取信息的公共接口")
 @Controller
 @RequestMapping("/teaCommon")
 public class TeaCommonController {
     @Resource
     private TeaCommonService teaCommonService;
 
-    @RequestMapping("/getTeaInfo/{authId}")
+    @RequestMapping(value = "/getTeaInfo",method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "通过进教师统一认证吗获取教师信息")
     @ApiImplicitParam(name = "authId", value = "教师的统一认证码")
-    public ResponseData getTeaInfo(@PathVariable String authId) {
+    public ResponseData getTeaInfo(@RequestParam String authId) {
         return teaCommonService.getTeaInfo(authId);
 
     }
@@ -109,12 +114,12 @@ public class TeaCommonController {
      */
     @RequestMapping("/getQRCode")
     @ResponseBody
-    @ApiOperation(value = "获取微信小程序的accessToken")
+    @ApiOperation(value = "获取微信小程序的二维码")
     @ApiImplicitParams({@ApiImplicitParam(name = "scene", value = "参数"), @ApiImplicitParam(name = "page", value = "页面"), @ApiImplicitParam(name = "width", value = "狂赌")})
     public ResponseData getQRCode(@RequestParam Map<String, String> paramsMap, HttpServletResponse response) {
-        System.out.println("scene"+paramsMap.get("scene"));
-        System.out.println("page"+paramsMap.get("page"));
-        System.out.println("width"+paramsMap.get("width"));
+        System.out.println("scene" + paramsMap.get("scene"));
+        System.out.println("page" + paramsMap.get("page"));
+        System.out.println("width" + paramsMap.get("width"));
         Map<String, Object> resultMap = CommonUtil.getAccessToken();
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put("content-type", "application/json");
@@ -124,7 +129,7 @@ public class TeaCommonController {
         //System.out.println(resultMap.get("errcode"));
         PrintWriter printWriter = null;
         OutputStream out = null;
-        System.out.println("accessToken"+resultMap.get("access_token"));
+        System.out.println("accessToken" + resultMap.get("access_token"));
         if (resultMap != null) {
             if (resultMap.get("access_token") != null) {
                 resultUrl = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=ACCESS_TOKEN".replace("ACCESS_TOKEN", (CharSequence) resultMap.get("access_token"));
@@ -169,6 +174,15 @@ public class TeaCommonController {
 //            }
 //        }
         return ResponseUtil.setResponse(200, "OK", org.apache.commons.codec.binary.Base64.encodeBase64String(resultByte));
+    }
+
+    @ApiOperation(value = "通过学号获取教学班信息")
+    @RequestMapping(value = "/getClassInfo/{stuId}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiImplicitParam(name = "stuId", value = "学号")
+    public ResponseData getClassInfo(@PathVariable String stuId) {
+        return teaCommonService.getClassInfo(stuId);
+
     }
 }
 

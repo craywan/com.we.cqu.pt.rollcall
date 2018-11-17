@@ -3,14 +3,14 @@ package edu.uddp.service;
 import com.alibaba.fastjson.JSON;
 import edu.uddp.mapper.*;
 import edu.uddp.model.*;
-import edu.uddp.util.JwzxUtil;
-import edu.uddp.util.RedisUtil;
-import edu.uddp.util.ResponseUtil;
+import edu.uddp.util.*;
 import edu.uddp.vo.ResponseData;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -25,11 +25,13 @@ public class TeaSignServiceImpl implements TeaSignService {
     @Resource
     private TeaSignMapper teaSignMapper;
     @Resource
-    private RedisUtil redisUtil;
-    @Resource
     private TeaSignStatisticMapper teaSignStatisticMapper;
     @Resource
     private CodeRecordMapper codeRecordMapper;
+    @Resource
+    private StuInfoServiceImpl stuInfoService;
+    @Resource
+    private SignLogMapper signLogMapper;
 
     @Override
     public ResponseData selectCourses(String teaId) {
@@ -57,23 +59,23 @@ public class TeaSignServiceImpl implements TeaSignService {
         CodeRecord codeRecord = codeRecordMapper.selectByPrimaryKey(1);
         int codeIndex = codeRecord.getCodeIndex();
         //记录加1
-        if(codeIndex>=30000){
+        if (codeIndex >= 30000) {
             codeRecord.setCodeIndex(5);
             codeRecord.setId(1);
-        }else{
-            codeRecord.setCodeIndex(codeIndex+1);
+        } else {
+            codeRecord.setCodeIndex(codeIndex + 1);
             codeRecord.setId(1);
         }
         codeRecordMapper.updateByPrimaryKey(codeRecord);
         TeaSign teaSign = new TeaSign();
         CodeUuid codeUuid = codeUuidMapper.selectByPrimaryKey(codeIndex);
-        logger.error(codeIndex+"codeIndex获取得到的code编号===========TeaSignServiceImpl");
+        logger.error(codeIndex + "codeIndex获取得到的code编号===========TeaSignServiceImpl");
         //把状态置为1
         codeUuid.setStatus((byte) 1);
         codeUuidMapper.updateByPrimaryKey(codeUuid);
         String signId = codeUuid.getId().toString();
         String signPassword = codeUuid.getCode();
-        System.out.println("signId"+signId);
+        System.out.println("signId" + signId);
         //生成签到
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm");
@@ -84,7 +86,7 @@ public class TeaSignServiceImpl implements TeaSignService {
         teaSign.setClasssId((String) paramsMap.get("classId"));
         teaSign.setTeaId((String) paramsMap.get("teaId"));
         teaSign.setWeeks((String) paramsMap.get("weeks"));
-        teaSign.setStatus(1);
+        teaSign.setStatus(1);//状态
         int flag = teaSignMapper.insertSelective(teaSign);
         System.out.println("flag" + flag);
         if (flag != 0) {
@@ -108,13 +110,30 @@ public class TeaSignServiceImpl implements TeaSignService {
             //改动将signPassword作为缓存的键
             System.out.println(signPassword);
             System.out.println(stuInfosMap.toString());
-            boolean bl = redisUtil.setHash(signPassword, stuInfosMap);
+//            boolean bl = redisUtil.setHash(signPassword, stuInfosMap);
+            //将点名的学生数据存到缓存中
+            boolean bl =true;
+            EhcacheUtil.getInstance().put("mobileCache",signPassword,stuInfosMap,40*60*1000);
+            //添加教师点名信息和口令的映射,信息之间用分号隔开
+            String infoKey = (paramsMap.get("teaId")+";"+paramsMap.get("lessonId")+";"+paramsMap.get("weeks")+";"+paramsMap.get("classId")).trim();
+            boolean bl2=true;
+//                    redisUtil.set(infoKey,signPassword,20*60*1000l);
+            EhcacheUtil.getInstance().put("mobileCache",infoKey,signPassword,40*60&1000);
             resultMap.put("signId", signId);
             resultMap.put("signPassword", signPassword);
-            resultMap.put("signStatus", teaSign.getStatus());
-            resultMap.put("beginTime", nowTime);
+//            resultMap.put("signStatus", teaSign.getStatus());
+//            resultMap.put("beginTime", nowTime);
 
-            if (bl == true) {
+            if (bl == true&&bl2==true) {
+                //记录到日志
+                SignLog signLog = new SignLog();
+                signLog.setUserId((String) paramsMap.get("teaId"));
+                signLog.setClassId((String) paramsMap.get("classId"));
+                signLog.setLessonId((String) paramsMap.get("lessonId"));
+                signLog.setSignPassword(signPassword);
+                signLog.setSignTime(nowTime);
+                signLog.setWeeks((String) paramsMap.get("weeks"));
+                signLogMapper.insertSelective(signLog);
                 return ResponseUtil.setResponse(200, "OK", resultMap);
             } else {
                 return ResponseUtil.setResponse(5008, "获取学生数据失败", null);
@@ -156,27 +175,70 @@ public class TeaSignServiceImpl implements TeaSignService {
             }
         }
         int flag = 0;
-        if (!(redisUtil.getHashKey(signPassword, stuId) == null)) {
-            //获取缓存中map集合中的value
-            int stuStatus = (int) redisUtil.getHashKey(signPassword, stuId);
-            //获取nums
-            int signNums = (int) redisUtil.getHashKey(signPassword, "signNums");
-            if (stuStatus == 1) {
-                flag = 2;//重复签到
-            } else {
-                //更新
-                redisUtil.updataHash(signPassword, stuId, 1);
-                redisUtil.updataHash(signPassword, "signNums", signNums + 1);
-                flag = 1;//成功签到
+        if(!(EhcacheUtil.getInstance().get("mobileCache",signPassword)==null)) {
+        //获取缓存中的签到信息集合
+            Map<Object,Object> signInfoMap = (Map<Object, Object>) EhcacheUtil.getInstance().get("mobileCache",signPassword);
+
+            //获取学生的签到状态,判断学生是否在该集合中
+            int stuStatus;
+            if(signInfoMap.get(stuId)!=null){
+             stuStatus = (int) signInfoMap.get(stuId);
+            }else{
+                return ResponseUtil.setResponse(5004, "口令输入错误或者签到失败", null);
             }
+            //获取签到人数
+            int signNums= (int) signInfoMap.get("signNums");
+            //状态判断
+            if(stuStatus==1){
+                flag=2;//重复签到
+            }else{
+                //更新签到状态
+                signInfoMap.put(stuId,1);
+                signInfoMap.put("signNums",signNums+1);
+                flag=1;//签到成功
+            }
+
+
+//        if (!(redisUtil.getHashKey(signPassword, stuId) == null)) {
+//            //获取缓存中map集合中的value
+//            int stuStatus = (int) redisUtil.getHashKey(signPassword, stuId);
+//            //获取nums
+//            int signNums = (int) redisUtil.getHashKey(signPassword, "signNums");
+//            if (stuStatus == 1) {
+//                flag = 2;//重复签到
+//            } else {
+//                //更新
+//                redisUtil.updataHash(signPassword, stuId, 1);
+//                redisUtil.updataHash(signPassword, "signNums", signNums + 1);
+//                flag = 1;//成功签到
+//            }
             session.setAttribute("signNums", signNums + 1);
             if (flag == 1) {
+                //记录日志
+                SignLog signLog = new SignLog();
+                signLog.getSignPassword(signPassword);
+                signLog.setUserId(stuId);
+//                Integer signId=LogUtil.getSignId(signPassword);
+                CodeUuidExample codeUuidExample2 = new CodeUuidExample();
+                codeUuidExample.createCriteria().andCodeEqualTo(signPassword);
+                List<CodeUuid> codeUuid2 =  codeUuidMapper.selectByExample(codeUuidExample);
+                TeaSignExample teaSignExample = new TeaSignExample();
+                Integer signId=codeUuid2.get(0).getId();
+                teaSignExample.createCriteria().andSignIdEqualTo(signId.toString()).andStatusEqualTo(1);
+                List<TeaSign> signList = teaSignMapper.selectByExample(teaSignExample);
+                signLog.setWeeks(signList.get(0).getWeeks());
+                signLog.setLessonId(signList.get(0).getLessonId());
+                signLog.setClassId(signList.get(0).getClasssId());
+                //获取当前时间
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                Calendar calendar = Calendar.getInstance();
+                signLog.setSignTime(simpleDateFormat.format(calendar.getTime()));
                 return ResponseUtil.setResponse(200, "OK", bteaSign);
             } else {
                 return ResponseUtil.setResponse(5005, "重复签到", null);
             }
         } else {
-            return ResponseUtil.setResponse(5004, "口令输入错误", null);
+            return ResponseUtil.setResponse(5004, "口令输入错误或者签到", null);
         }
     }
 
@@ -186,8 +248,19 @@ public class TeaSignServiceImpl implements TeaSignService {
         String signId = (String) paramsMap.get("signId");
         String lessonId = (String) paramsMap.get("lessonId");
         String signPassword = (String) paramsMap.get("signPassword");
-        String weeks = (String) paramsMap.get("weeks");
-        String weeksDay = (String) paramsMap.get("weeksDay");
+        String classId = (String) paramsMap.get("classId");
+
+        String weeks = null;
+        String weeksDay = null;
+        if (((String) paramsMap.get("weeks")) == null || ((String) paramsMap.get("weeksDay")) == null) {
+            weeks = "0";
+            weeksDay = "0";
+
+        } else {
+            weeks = (String) paramsMap.get("weeks");
+            weeksDay = (String) paramsMap.get("weeksDay");
+        }
+
          /*
         参数：教师id,签到id,课程id,签到口令，周数weeks，星期数days
         动作;
@@ -198,7 +271,7 @@ public class TeaSignServiceImpl implements TeaSignService {
          */
         //状态置为0
         TeaSignExample teaSignExample = new TeaSignExample();
-        teaSignExample.createCriteria().andSignIdEqualTo(signId).andTeaIdEqualTo(teaId).andLessonIdEqualTo(lessonId);
+        teaSignExample.createCriteria().andSignIdEqualTo(signId).andTeaIdEqualTo(teaId).andLessonIdEqualTo(lessonId).andClasssIdEqualTo(classId);
         TeaSign teaSign = new TeaSign();
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm");
@@ -214,20 +287,32 @@ public class TeaSignServiceImpl implements TeaSignService {
         int bl = codeUuidMapper.updateByExampleSelective(codeUuid, codeUuidExample);
         logger.error(bl + "codeUuid=============TeaSignServiceImpl");
         int changeId = Integer.valueOf(signId);
-        if(changeId>=30000){
-            changeId=5;
-        }else{
-            changeId=changeId+1;
+        if (changeId >= 30000) {
+            changeId = 5;
+        } else {
+            changeId = changeId + 1;
             System.out.println(changeId);
         }
         CodeRecord codeRecord = new CodeRecord();
         codeRecord.setId(1);
         codeRecord.setCodeIndex(changeId);
         codeRecordMapper.updateByPrimaryKey(codeRecord);
-        logger.error(changeId+"更新后的code编号changeId===========================TeaSignServiceImpl");
+        logger.error(changeId + "更新后的code编号changeId===========================TeaSignServiceImpl");
+        //移除缓存的教师ID
+        String infoKey=null;
+        if(weeks!="0") {
+             infoKey = (paramsMap.get("teaId") + ";" + paramsMap.get("lessonId") + ";" + paramsMap.get("weeks") + ";" + paramsMap.get("classId")).trim();//后期添加ClassId            redisUtil.remove(infoKey);
+        }else{
+            infoKey=(paramsMap.get("teaId") + ";" +paramsMap.get("classId")).trim();
+        }
+        EhcacheUtil.getInstance().remove("mobileCache",infoKey);
         //获取缓存中的数据
-        Map<Object, Object> stuIdMap = (Map<Object, Object>) redisUtil.getHashKeys(signPassword);
+//        Map<Object, Object> stuIdMap = (Map<Object, Object>) redisUtil.getHashKeys(signPassword);
+        Map<Object,Object> stuIdMap = (Map<Object, Object>) EhcacheUtil.getInstance().get("mobileCache",signPassword);
+        EhcacheUtil.getInstance().remove("mobileCache",signPassword);
+
         logger.error(stuIdMap + "======================TeaSignServiceImpl");
+        if(stuIdMap!=null){
         //List<String> unSignList = new ArrayList<>();
         Map<String, Object> unSignMap = new HashMap<>();
         //取出signNums
@@ -235,8 +320,14 @@ public class TeaSignServiceImpl implements TeaSignService {
         Set<Object> set = stuIdMap.keySet();
         for (Iterator<Object> iterator = set.iterator(); iterator.hasNext(); ) {
             String stuId = (String) iterator.next();
-            int value = (int) stuIdMap.get(stuId);
-            if (value == 0) {
+            //区分班级签到和学生签到
+            Object value=-1;
+            if(weeks=="0") {
+                value =  stuIdMap.get(stuId);
+            }else{
+                value=stuIdMap.get(stuId);
+            }
+            if ("0".equals(value)||value.equals(0)) {
                 unSignMap.put(stuId, 0);
             }
         }
@@ -275,10 +366,34 @@ public class TeaSignServiceImpl implements TeaSignService {
             flag = teaSignStatisticMapper.insertSelective(teaSignStatistic);
         }
         if (flag != -1) {
-            List<Object> lessonStuids = Arrays.asList((Object) set);
-            return ResponseUtil.setResponse(200, "OK", lessonStuids);
+            //获取该教学班的信息
+            //暂时用lessonId的长度来判断是是行政班还是教学班
+            List<StuInfo> stuInfos = new ArrayList<>();
+            if (lessonId.length() > 10) {
+                stuInfos = JwzxUtil.classStuList(lessonId, "lesson");
+            } else {
+                stuInfos = stuInfoService.selectByClassId(lessonId);
+            }
+            List<Map<String, Object>> stuInfoList = new ArrayList<>();
+            for (StuInfo stuInfo : stuInfos) {
+                Map<String, Object> stuInfoMap = new HashMap<>();
+                stuInfoMap.put("xh", stuInfo.getStuId());
+                stuInfoMap.put("name", stuInfo.getName());
+                stuInfoMap.put("class", stuInfo.getClassId());
+                if (unSignMap.containsKey(stuInfo.getStuId())) {
+                    stuInfoMap.put("status", "0");
+                } else {
+                    stuInfoMap.put("status", "1");
+                }
+                stuInfoList.add(stuInfoMap);
+            }
+
+//   List<Object> lessonStuids = Arrays.asList((Object) set);
+            return ResponseUtil.setResponse(200, "OK", stuInfoList);
         } else {
             return ResponseUtil.setResponse(5005, "签到结束异常", null);
+        }}else{
+            return  ResponseUtil.setResponse(5008,"没有创建该签到",null);
         }
 
 
@@ -318,11 +433,12 @@ public class TeaSignServiceImpl implements TeaSignService {
 
     @Override
     public ResponseData getSignNums(String signPassword) {
-        Map<Object,Object> stuInfosMap =redisUtil.getHashKeys(signPassword);
-        if(!stuInfosMap.isEmpty()){
-            return ResponseUtil.setResponse(200,"Ok",stuInfosMap);
-        }else{
-            return ResponseUtil.setResponse(5004,"学生信息为空",null);
+//        Map<Object, Object> stuInfosMap = redisUtil.getHashKeys(signPassword);
+        Map<Object, Object> stuInfosMap= (Map<Object, Object>) EhcacheUtil.getInstance().get("mobileCache",signPassword);
+        if (!stuInfosMap.isEmpty()) {
+            return ResponseUtil.setResponse(200, "Ok", stuInfosMap);
+        } else {
+            return ResponseUtil.setResponse(5004, "学生信息为空", null);
         }
     }
 
